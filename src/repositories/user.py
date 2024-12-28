@@ -42,6 +42,10 @@ class UserRepository:
     def find_by_id(db: Session, id: int) -> User:
         return db.query(User).filter(User.id == id).first()
 
+    @staticmethod
+    def find_by_username(db: Session, username: str) -> User:
+        return db.query(User).filter(User.username == username).first()
+
 
     @staticmethod
     def delete_by_id(db: Session, id: int) -> None:
