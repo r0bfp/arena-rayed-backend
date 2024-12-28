@@ -1,0 +1,44 @@
+version: '3.3'
+
+networks:
+  rage_net:
+    driver: bridge
+    name: rage_net
+
+volumes:
+  rage-datavolume:
+
+services:
+  db:
+    container_name: db
+    image: mysql
+    environment:
+      MYSQL_DATABASE: 'rage'
+      MYSQL_PASSWORD: '123'
+      MYSQL_ROOT_PASSWORD: '123'
+    ports:
+      - '3306:3306'
+    networks:
+      - rage_net
+    volumes:
+      - rage-datavolume:/var/lib/mysql
+
+  backend:
+    container_name: backend
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - '8000:8000'
+    expose:
+      - '8000'
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000
+    networks:
+      - rage_net
+    environment:
+      DB_USER: 'root'
+      DB_PASS: '123'
+      DB_HOST: db
+      DB_NAME: 'rage'
