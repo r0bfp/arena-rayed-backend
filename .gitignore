@@ -1,4 +1,5 @@
 venv/*
+certs/*
 *.pyc
 *.sqlite3
 .env.sh
