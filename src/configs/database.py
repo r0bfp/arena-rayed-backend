@@ -4,31 +4,16 @@ from sqlalchemy.orm import sessionmaker
 from os import environ
 
 
-username = environ.get('RAGE_DB_USER')
-password = environ.get('RAGE_DB_PASS')
-hostname = environ.get('RAGE_DB_HOST')
-database = environ.get('RAGE_DB_NAME')
-unix_socket_path = environ.get('UNIX_SOCKET_PATH')
 
-if unix_socket_path:
-    connection_url = engine.url.URL.create(
-        drivername="mysql+pymysql",
-        username=username,
-        password=password,
-        database=database,
-        query={"unix_socket": unix_socket_path},
-    )
-else:
-    connection_url = engine.url.URL.create(
-        drivername = 'mysql+pymysql',
-        username   = username,
-        password   = password,
-        host       = hostname,
-        database   = database,
-        port       = 3306,
-    )
-
-
+connection_url = engine.url.URL.create(
+    drivername = 'cockroachdb',
+    username   = environ.get('RAGE_DB_USER'),
+    password   = environ.get('RAGE_DB_PASS'),
+    database   = environ.get('RAGE_DB_NAME'),
+    host       = environ.get('RAGE_DB_HOST'),
+    port       = 26257,
+    query      = {'sslmode': 'verify-full'}
+)
 engine = create_engine(connection_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
@@ -40,7 +25,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
 
 def setup_database():
     Base.metadata.create_all(bind=engine)
