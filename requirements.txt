@@ -9,5 +9,6 @@ psycopg2==2.9.9
 pymysql
 bcrypt==4.1.2
 python-jose==3.3.0
-cryptography==42.0.0
+cryptography==42.0.
+sqlalchemy-cockroachdb==2.0.2
 PyMySQL[rsa]
