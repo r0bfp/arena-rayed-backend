@@ -9,6 +9,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
+from datetime import datetime
 
 
 # revision identifiers, used by Alembic.
@@ -19,12 +20,21 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.create_table(
+    table = op.create_table(
         'games',
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('name', sa.String(length=50), nullable=False),
         sa.Column('created_at', sa.DateTime),
         sa.Column('updated_at', sa.DateTime),
+    )
+
+    op.bulk_insert(
+        table,
+        [
+            {'id': 1, 'name': 'CS', 'created_at': datetime.today()},
+            {'id': 2, 'name': 'Pokemon', 'created_at': datetime.today()},
+            {'id': 3, 'name': 'League Of Legends', 'created_at': datetime.today()},
+        ]
     )
 
 

@@ -1,4 +1,4 @@
-"""create table rounds
+"""create table matches
 
 Revision ID: 767d5433afc4
 Revises: a7af18884e23
@@ -20,14 +20,15 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.create_table(
-        'rounds',
+        'matches',
         sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('player_one_id', sa.Integer, nullable=False),
-        sa.Column('player_two_id', sa.Integer, nullable=False),
+        sa.Column('round_number', sa.Integer, nullable=False),
         sa.Column('tournament_id', sa.Integer, nullable=False),
         sa.Column('winner_id', sa.Integer),
+        sa.Column('status', sa.String(length=50), nullable=False),
+        sa.Column('contested', sa.Boolean, nullable=False),
     )
 
 
 def downgrade() -> None:
-    op.drop_table('rounds')
+    op.drop_table('matches')
