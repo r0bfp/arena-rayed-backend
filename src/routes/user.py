@@ -11,13 +11,24 @@ from src.usecases.user import UserUseCase
 
 
 # router = APIRouter(prefix='/users', dependencies=[Depends(Auth.is_authenticated)])
-router = APIRouter(prefix='/users')
+router = APIRouter(prefix='/users', tags=['Users'])
 
 @router.get('', response_model=List[UserOut])
 def list(db: Session = Depends(get_db)):
     users = UserUseCase.list_users(db)
 
     return [UserOut.model_validate(user) for user in users]
+
+
+@router.get('/me', response_model=UserOut, status_code=status.HTTP_201_CREATED)
+def me(
+    db: Session = Depends(get_db), 
+    user_id = Depends(Auth.is_authenticated)
+):
+    try: 
+        return UserUseCase.find_one(db, user_id)
+    except UserNotFound as err:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
 
 
 @router.post('', response_model=UserOut, status_code=status.HTTP_201_CREATED)
@@ -30,14 +41,14 @@ def create(request: UserIn, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Email already exists')
 
 
-@router.get("/{id}", response_model=UserOut)
+@router.get('/{id}', response_model=UserOut)
 def find_one(id: int, db: Session = Depends(get_db)):
     try: 
         user = UserUseCase.get_a_user(db, id)
 
         return UserOut.model_validate(user)
     except UserNotFound:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
 
 
 @router.put('/{id}', response_model=UserOut)
@@ -47,7 +58,7 @@ def update(request: UserIn, id: int, db: Session = Depends(get_db)):
 
         return UserOut.model_validate(user)
     except UserNotFound:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
     except DuplicatedUsername:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Username already exists')
     except DuplicatedEmail:
@@ -62,7 +73,7 @@ def delete(id: int, db: Session = Depends(get_db)):
 
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     except UserNotFound:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
 
 
 

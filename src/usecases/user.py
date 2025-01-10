@@ -11,6 +11,17 @@ from ..repositories.user import UserRepository
 
 class UserUseCase:
     @staticmethod
+    def find_one(db: Session, id: int) -> None:
+        user = UserRepository.find_by_id(db, id)
+
+        if not user:
+            UserNotFound
+
+        return user
+
+
+
+    @staticmethod
     def delete_user(db: Session, id: int) -> None:
         if not UserRepository.exists_by_id(db, id):
             raise UserNotFound
