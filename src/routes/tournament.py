@@ -12,7 +12,7 @@ from src.utils.auth import Auth
 from src.usecases.tournament import TournamentUseCase
 
 
-router = APIRouter(prefix='/tournaments')
+router = APIRouter(prefix='/tournaments', tags=["Tournaments"])
 
 
 @router.get('', response_model=List[TournamentOut])
