@@ -14,7 +14,7 @@ from src.configs.database import get_db
 from src.utils.auth import Auth
 
 
-router = APIRouter(prefix='/tournaments')
+router = APIRouter(prefix='/tournaments', tags=["Tournaments"])
 
 
 @router.post('/{tournament_id}/participants', response_model=ParticipantOut, status_code=status.HTTP_201_CREATED)

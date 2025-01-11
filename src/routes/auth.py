@@ -8,7 +8,7 @@ from src.utils.auth import Auth
 from ..usecases.auth import AuthUseCase
 
 
-router = APIRouter(prefix='/auth')
+router = APIRouter(prefix='/auth', tags=["Authorization"])
 
 @router.post('/signin', response_model=Token)
 def signin(

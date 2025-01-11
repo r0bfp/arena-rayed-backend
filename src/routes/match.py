@@ -11,7 +11,7 @@ from ..schemas.match import MatchOut
 from ..errors.match import MatchNotFound
 
 
-router = APIRouter(prefix='/matches')
+router = APIRouter(prefix='/matches', tags=["Matches"])
 
 
 @router.get('/{match_id}', response_model=MatchOut)
