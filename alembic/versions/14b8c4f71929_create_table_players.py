@@ -25,7 +25,7 @@ def upgrade() -> None:
         sa.Column('match_id', sa.Integer, nullable=False),
         sa.Column('user_id', sa.Integer, nullable=False),
         sa.Column('status', sa.String(50), nullable=False),
-        sa.Column('winner_id', sa.Integer),
+        sa.Column('is_winner', sa.Boolean),
     )
 
 

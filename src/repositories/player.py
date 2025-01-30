@@ -1,3 +1,4 @@
+from typing import List
 from sqlalchemy.orm import Session
 
 from ..models.player import Player
@@ -11,8 +12,18 @@ class PlayerRepository:
 
 
     @staticmethod
-    def find_opponent(db: Session, match_id: int, user_id: int) -> Player:
+    def find_opponent_of_match(db: Session, match_id: int, user_id: int) -> Player:
         return db.query(Player).filter(Player.match_id == match_id, Player.user_id != user_id).first()
+
+
+    @staticmethod
+    def find_opponents(db: Session, user_id: int) -> List[Player]:
+        subquery = db.query(Player.match_id).filter(Player.user_id == user_id).subquery()
+        return db.query(Player).filter(
+            Player.match_id.in_(subquery),
+            Player.user_id != user_id
+        ).all()
+
 
 
     @staticmethod

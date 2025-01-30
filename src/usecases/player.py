@@ -1,8 +1,10 @@
 
+from typing import List
 from sqlalchemy.orm import Session
 
-from .match import MatchUseCase
+from src.models.player import Player
 
+from .match import MatchUseCase
 from ..models.enums import PlayerStatus
 from ..errors.match import MatchNotFound
 from ..repositories.match import MatchRepository
@@ -34,7 +36,7 @@ class PlayerUseCase:
         player.status = PlayerStatus.FINISHED
 
         PlayerRepository.create_or_update(db, player.as_dict())
-        MatchUseCase.update_status_if_players_finished(db, match)
+        MatchUseCase.update_status_if_both_players_finished(db, match)
 
 
     @staticmethod
@@ -45,7 +47,7 @@ class PlayerUseCase:
             raise MatchNotFound
 
         player = PlayerRepository.find_by_match_id_and_user_id(db, match_id, user_id)
-        opponent = PlayerRepository.find_opponent(db, match_id, user_id)
+        opponent = PlayerRepository.find_opponent_of_match(db, match_id, user_id)
 
         if not player:
             raise PlayerNotFound('You are not a player of this match')
@@ -65,3 +67,8 @@ class PlayerUseCase:
             PlayerRepository.create_or_update(db, opponent.as_dict())
         
         MatchUseCase.update_status_if_both_players_ready(db, match)
+
+
+    @staticmethod
+    def find_opponents(db: Session, user_id: int) -> List[Player]:
+        return PlayerRepository.find_opponents(db, user_id)

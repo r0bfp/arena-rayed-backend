@@ -10,13 +10,11 @@ class Player(Base):
     id        = Column(types.Integer, primary_key=True, index=True)
     match_id  = Column(types.Integer, ForeignKey('matches.id'), nullable=False)
     user_id   = Column(types.Integer, ForeignKey('users.id'), nullable=False)
-    winner_id = Column(types.Integer, ForeignKey('users.id'))
+    is_winner = Column(types.Boolean, nullable=False, default=False)
     status    = Column(Enum(PlayerStatus), nullable=False)
 
     user      = relationship('User', foreign_keys=[user_id])
-    winner    = relationship('User', foreign_keys=[winner_id])
     match     = relationship('Match', back_populates='players')
-
 
 
     def as_dict(self):
