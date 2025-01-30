@@ -16,7 +16,4 @@ def me(
     db: Session = Depends(get_db), 
     user_id = Depends(Auth.is_authenticated)
 ) -> List[PlayerOpponentOut]:
-    opponents = PlayerUseCase.find_opponents(db, user_id)
-
-    print(opponents[0].user.username)
-    return opponents
+    return PlayerUseCase.find_opponents(db, user_id)
