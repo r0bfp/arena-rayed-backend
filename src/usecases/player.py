@@ -14,25 +14,21 @@ from ..repositories.player import PlayerRepository
 
 class PlayerUseCase:
     @staticmethod
-    def set_winner(db: Session, match_id: int, user_id: int, winner_id: int) -> None:
+    def finished(db: Session, match_id: int, user_id: int, is_winner: bool) -> None:
         match = MatchRepository.find_by_id(db, match_id)
 
         if not match:
             raise MatchNotFound
 
         player = PlayerRepository.find_by_match_id_and_user_id(db, match_id, user_id)
-        winner = PlayerRepository.find_by_match_id_and_user_id(db, match_id, winner_id)
-
-        if not winner:
-            raise PlayerNotFound('Winner are not a player of this match')
 
         if not player:
             raise PlayerNotFound('You are not a player of this match')
 
         if player.status != PlayerStatus.PLAYING:
-            raise InvalidPlayerStatus('Player are not playing to define winner')
+            raise InvalidPlayerStatus('Player are not playing')
 
-        player.winner_id = winner_id
+        player.is_winner = is_winner
         player.status = PlayerStatus.FINISHED
 
         PlayerRepository.create_or_update(db, player.as_dict())

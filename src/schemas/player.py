@@ -21,3 +21,6 @@ class PlayerOpponentOut(BaseModel):
         player.round_number = player.match.round_number
 
         return player
+    
+class PlayerIn(BaseModel):
+    is_winner: bool
