@@ -1,5 +1,8 @@
+from operator import is_
 from typing import List, Optional
-from pydantic import BaseModel, BaseModel
+from pydantic import BaseModel, BaseModel, model_validator
+
+from .user import UserBase
 
 from ..models.enums import MatchStatus, PlayerStatus
 
@@ -12,10 +15,18 @@ class User(BaseModel):
 
 class Player(BaseModel):
     id: int
-    winner: Optional[User] = None
+    user_id: int
     status: PlayerStatus
-    user: User
+    username: str
+    is_winner: bool
 
+    @model_validator(mode='before')
+    @classmethod
+    def flat_player(cls, player: UserBase) -> str:
+        player.username = player.user.username
+        player.user_id = player.user.id
+
+        return player
 
 
 class MatchOut(BaseModel):
@@ -23,5 +34,4 @@ class MatchOut(BaseModel):
     status: MatchStatus
     round_number: int
     contested: bool
-    winner: Optional[User] = None
     players: List[Player]

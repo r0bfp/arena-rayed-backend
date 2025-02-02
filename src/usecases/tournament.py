@@ -4,6 +4,8 @@ from random import shuffle
 from typing import List
 from sqlalchemy.orm import Session
 
+from ..models.player import Player
+
 from ..repositories.player import PlayerRepository
 from ..repositories.match import MatchRepository
 from ..repositories.participant import ParticipantRepository
@@ -20,6 +22,54 @@ from ..models.tournament import Tournament
 
 
 class TournamentUseCase:
+    @staticmethod
+    def generate_rounds(db: Session, tournament_id: int, players: List[Player], round_number: int) -> None:
+        shuffle(players)
+
+        players_pairs = [players[i:i + 2] for i in range(0, len(players), 2)]
+
+        for pair in players_pairs:
+            player_one = pair[0].user_id
+            player_two = pair[1].user_id
+
+            match = MatchRepository.create_or_update(db, {
+                'round_number': round_number,
+                'tournament_id': tournament_id,
+                'status': MatchStatus.ONGOING
+            })
+
+            PlayerRepository.create_or_update(db, {
+                'match_id': match.id,
+                'user_id': player_one,
+                'status': PlayerStatus.PENDING
+            })
+            PlayerRepository.create_or_update(db, {
+                'match_id': match.id,
+                'user_id': player_two,
+                'status': PlayerStatus.PENDING
+            })
+
+
+    @staticmethod
+    def generate_next_round_if_prev_finished(db: Session, tournament_id: int) -> None:
+        matches = MatchRepository.find_all_from_last_round_by_tournament_id(db, tournament_id)
+
+        if not all(match.status == MatchStatus.COMPLETED for match in matches):
+            return
+
+        if any(match.contested for match in matches):
+            return
+
+        current_round = matches[0].round_number
+
+        winners = MatchRepository.find_winners_by_round(db, tournament_id, current_round)
+
+        if len(winners) == 1:
+            TournamentRepository.update_status(db, tournament_id, TournamentStatus.COMPLETED)
+        else:
+            TournamentUseCase.generate_rounds(db, tournament_id, winners, current_round + 1)
+
+
     @staticmethod
     def create(db: Session, new_tournament: TournamentIn, user_id: int) -> Tournament:
         if new_tournament.starts_in < datetime.now() or new_tournament.ends_in < datetime.now():
@@ -91,32 +141,8 @@ class TournamentUseCase:
             raise TournamentCapacityNotReached("Minimum tournament capacity not reached.")
 
         TournamentRepository.update_status(db, tournament_id, TournamentStatus.ONGOING)
-
         players = ParticipantRepository.find_all_by_tournament_id(db, tournament_id)
-        shuffle(players)
-
-        players_pairs = [players[i:i + 2] for i in range(0, len(players), 2)]
-
-        for pair in players_pairs:
-            player_one = pair[0].user_id
-            player_two = pair[1].user_id
-
-            match = MatchRepository.create_or_update(db, {
-                'round_number': 1,
-                'tournament_id': tournament_id,
-                'status': MatchStatus.ONGOING
-            })
-
-            PlayerRepository.create_or_update(db, {
-                'match_id': match.id,
-                'user_id': player_one,
-                'status': PlayerStatus.PENDING
-            })
-            PlayerRepository.create_or_update(db, {
-                'match_id': match.id,
-                'user_id': player_two,
-                'status': PlayerStatus.PENDING
-            })
+        TournamentUseCase.generate_rounds(db, tournament_id, players, 1)
 
 
     @staticmethod

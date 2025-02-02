@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel, model_validator
 
 from ..models.player import Player
@@ -21,3 +22,8 @@ class PlayerOpponentOut(BaseModel):
         player.round_number = player.match.round_number
 
         return player
+
+class PlayerIn(BaseModel):
+    user_id: Optional[int] = None
+    is_winner: Optional[bool] = False
+
