@@ -17,7 +17,6 @@ class User(Base):
 
     tournament            = relationship('Tournament', back_populates='owner')
     participate           = relationship('Participant', back_populates='user')
-    matches_as_winner     = relationship('Match', foreign_keys='Match.winner_id', back_populates='winner')
     playing               = relationship('Player', foreign_keys='Player.user_id', back_populates='user')
 
     def as_dict(self):

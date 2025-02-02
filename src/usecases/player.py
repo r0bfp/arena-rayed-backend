@@ -14,6 +14,28 @@ from ..repositories.player import PlayerRepository
 
 class PlayerUseCase:
     @staticmethod
+    def set_winner(db: Session, match_id: int, applicant_id: int, user_id: int, is_winner: bool) -> None:
+        match = MatchRepository.find_by_id(db, match_id)
+
+        if not match:
+            raise MatchNotFound
+
+        if applicant_id != match.tournament.owner_id:
+            raise PlayerNotFound('You are not the owner of this tournament')
+
+        player = PlayerRepository.find_by_match_id_and_user_id(db, match_id, user_id)
+
+        if not player:
+            raise PlayerNotFound('User are not a player of this match')
+
+        player.is_winner = is_winner
+        player.status = PlayerStatus.FINISHED
+
+        PlayerRepository.create_or_update(db, player.as_dict())
+        MatchUseCase.update_status_if_both_players_finished(db, match)
+
+
+    @staticmethod
     def finished(db: Session, match_id: int, user_id: int, is_winner: bool) -> None:
         match = MatchRepository.find_by_id(db, match_id)
 

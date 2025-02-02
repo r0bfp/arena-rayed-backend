@@ -75,3 +75,9 @@ def start(
 @router.get('/{tournament_id}/matches', response_model=List[MatchOut])
 def list_matches(tournament_id: int, db: Session = Depends(get_db)) -> List[MatchOut]:
     return TournamentUseCase.list_all_matches_by_tournament(db, tournament_id)
+
+
+# @router.put('/{tournament_id}/generate-next-round')
+# def list_matches(tournament_id: int, db: Session = Depends(get_db)):
+#     TournamentUseCase.generate_next_round_if_prev_finished(db, tournament_id)
+#     return 'OK'
